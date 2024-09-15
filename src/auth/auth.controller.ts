@@ -2,12 +2,11 @@ import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthGuard } from './guard/auth.guard';
 import { Request } from 'express';
-import { RolesGuard } from './guard/roles.guard';
-import { Roles } from './decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { AuthDecorator } from './decorators/auth.decorator';
+import { ActiveUserr } from 'src/common/decorators/active-user.decorator';
+import { UserActiveInterface } from 'src/common/interface/user-active.interface';
 
 interface RequestWithUser extends Request { // Interfaz creada para typar la informacion del usuario que viaja en el JWT
   user: {
@@ -28,7 +27,7 @@ export class AuthController {
     @Body()
     registerDto: RegisterUserDto
   ){
-    return this,this.authService.register(registerDto)
+    return this.authService.register(registerDto)
   }
 
   @Post('login')
@@ -49,8 +48,7 @@ export class AuthController {
 
   @Get('profile') //La diferencia con el de arriba es que aca solo usamos un decorador que junta varios decoradores
   @AuthDecorator(Role.ADMIN)
-  profile(
-    @Req() req : RequestWithUser){
-    return req.user
+  profile(@ActiveUserr() user: UserActiveInterface){
+    return user
   }
 }
